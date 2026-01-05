@@ -3,183 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محلل بيانات يوتيوب</title>
+    <title>محلل يوتيوب الذكي</title>
     <style>
         :root {
-            --primary-color: #ff0000;
-            --secondary-color: #282828;
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --card-bg: #ffffff;
-            --text-color: #333;
+            --primary: #ff0000;
+            --dark: #212121;
+            --gray: #606060;
+            --light: #f9f9f9;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-gradient);
-            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
-            color: var(--text-color);
+            padding: 20px;
         }
 
-        .container {
-            background: var(--card-bg);
-            width: 90%;
-            max-width: 600px;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        .app-card {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            padding: 25px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* ستايل النتائج */
+        #output { display: none; animation: fadeIn 0.5s; }
+
+        .thumb-container { position: relative; border-radius: 12px; overflow: hidden; }
+        .thumb-container img { width: 100%; display: block; }
+        
+        .download-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+        }
+
+        .video-info h2 { font-size: 1.2rem; margin: 15px 0; color: var(--dark); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
         }
 
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
+        .stat-label { font-size: 12px; color: var(--gray); display: block; }
+        .stat-value { font-weight: bold; color: var(--dark); font-size: 16px; }
 
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 2rem;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s;
-            font-size: 1rem;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary-color);
-        }
-
-        button {
-            padding: 12px 25px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #cc0000;
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        #output {
-            margin-top: 20px;
-            text-align: right;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-            display: none; /* مخفي حتى تظهر النتائج */
-        }
-
-        .video-card img {
-            width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .video-title {
-            font-size: 1.4rem;
-            margin: 15px 0;
-            color: var(--secondary-color);
-        }
-
-        .video-desc {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.6;
-            max-height: 100px;
-            overflow-y: auto;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 15px;
-            background: #fff3f3;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .stat-item {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        /* تنسيق لرسائل الخطأ */
-        .error-msg {
-            color: #d9534f;
-            background: #f2dede;
-            padding: 10px;
-            border-radius: 5px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1><span style="color: #282828;">محلل</span> YouTube</h1>
-    
-    <div class="search-box">
-        <input type="text" id="videoUrl" placeholder="ضع رابط الفيديو هنا...">
+<div class="app-card">
+    <div class="header">
+        <h1>YouTube Pro</h1>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="videoUrl" placeholder="أدخل رابط الفيديو هنا...">
         <button onclick="getVideoInfo()">تحليل</button>
     </div>
 
-    <div id="output"></div>
+    <div id="output">
+        </div>
 </div>
 
 <script>
+// وظيفة لتحويل مدة يوتيوب ISO 8601 إلى تنسيق وقت مقروء
+function parseDuration(duration) {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    const hours = (parseInt(match[1]) || 0);
+    const minutes = (parseInt(match[2]) || 0);
+    const seconds = (parseInt(match[3]) || 0);
+    
+    return [hours, minutes, seconds]
+        .map(v => v < 10 ? "0" + v : v)
+        .filter((v, i) => v !== "00" || i > 0)
+        .join(":");
+}
+
 async function getVideoInfo() {
-  const url = document.getElementById('videoUrl').value;
-  const outputDiv = document.getElementById('output');
+    const url = document.getElementById('videoUrl').value;
+    const output = document.getElementById('output');
+    if (!url) return;
 
-  if (!url) return alert("يرجى إدخال رابط الفيديو أولاً");
+    output.style.display = 'block';
+    output.innerHTML = "<p style='text-align:center'>جاري التحليل...</p>";
 
-  outputDiv.style.display = 'block';
-  outputDiv.innerHTML = "<p>جاري تحميل البيانات...</p>";
+    try {
+        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
 
-  try {
-    const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
-    const data = await res.json();
+        if (data.items && data.items[0]) {
+            const v = data.items[0];
+            const thumbUrl = v.snippet.thumbnails.maxres ? v.snippet.thumbnails.maxres.url : v.snippet.thumbnails.high.url;
+            
+            output.innerHTML = `
+                <div class="thumb-container">
+                    <img src="${thumbUrl}">
+                    <a href="${thumbUrl}" target="_blank" download class="download-btn">📥 تحميل الغلاف بجودة عالية</a>
+                </div>
+                
+                <div class="video-info">
+                    <h2>${v.snippet.title}</h2>
+                </div>
 
-    if (data.items && data.items.length > 0) {
-      const video = data.items[0];
-      outputDiv.innerHTML = `
-        <div class="video-card">
-          <img src="${video.snippet.thumbnails.high.url}" alt="Thumbnail">
-          <h2 class="video-title">${video.snippet.title}</h2>
-          <div class="stats">
-            <div class="stat-item">👁️ مشاهدات: ${Number(video.statistics.viewCount).toLocaleString()}</div>
-            <div class="stat-item">⏳ المدة: ${video.contentDetails.duration.replace('PT','').replace('H','س ').replace('M','د ').replace('S','ث')}</div>
-          </div>
-          <p class="video-desc">${video.snippet.description}</p>
-        </div>
-      `;
-    } else {
-      outputDiv.innerHTML = `<p class="error-msg">❌ لم يتم العثور على بيانات، تأكد من صحة الرابط.</p>`;
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">عدد المشاهدات</span>
+                        <span class="stat-value">${Number(v.statistics.viewCount).toLocaleString()}</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">مدة الفيديو</span>
+                        <span class="stat-value">${parseDuration(v.contentDetails.duration)}</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="margin-top:0">
+                    <span class="stat-label">عدد الإعجابات</span>
+                    <span class="stat-value">👍 ${Number(v.statistics.likeCount).toLocaleString()}</span>
+                </div>
+            `;
+        } else {
+            output.innerHTML = "لم يتم العثور على الفيديو";
+        }
+    } catch (e) {
+        output.innerHTML = "خطأ في جلب البيانات";
     }
-  } catch (error) {
-    outputDiv.innerHTML = `<p class="error-msg">⚠️ حدث خطأ في الاتصال بالخادم.</p>`;
-  }
 }
 </script>
 
