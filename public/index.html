@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>YouTube Video Info</title>
+</head>
+<body>
+<h1>أدخل رابط فيديو YouTube</h1>
+<input type="text" id="videoUrl" placeholder="https://youtu.be/...">
+<button onclick="getVideoInfo()">عرض بيانات الفيديو</button>
+
+<div id="output"></div>
+
+<script>
+async function getVideoInfo() {
+  const url = document.getElementById('videoUrl').value;
+  if (!url) return alert("أدخل رابط الفيديو");
+
+  const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+  const data = await res.json();
+  console.log(data);
+
+  if (data.items && data.items.length > 0) {
+    const video = data.items[0];
+    document.getElementById('output').innerHTML = `
+      <h2>${video.snippet.title}</h2>
+      <p>${video.snippet.description}</p>
+      <img src="${video.snippet.thumbnails.high.url}" width="320">
+      <p>مدة الفيديو: ${video.contentDetails.duration}</p>
+      <p>المشاهدات: ${video.statistics.viewCount}</p>
+    `;
+  } else {
+    document.getElementById('output').innerHTML = `<p>لم يتم العثور على بيانات الفيديو</p>`;
+  }
+}
+</script>
+</body>
+</html>
