@@ -1,38 +1,187 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>YouTube Video Info</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل بيانات يوتيوب</title>
+    <style>
+        :root {
+            --primary-color: #ff0000;
+            --secondary-color: #282828;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 600px;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #cc0000;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #output {
+            margin-top: 20px;
+            text-align: right;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none; /* مخفي حتى تظهر النتائج */
+        }
+
+        .video-card img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .video-title {
+            font-size: 1.4rem;
+            margin: 15px 0;
+            color: var(--secondary-color);
+        }
+
+        .video-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            max-height: 100px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            background: #fff3f3;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* تنسيق لرسائل الخطأ */
+        .error-msg {
+            color: #d9534f;
+            background: #f2dede;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-<h1>أدخل رابط فيديو YouTube</h1>
-<input type="text" id="videoUrl" placeholder="https://youtu.be/...">
-<button onclick="getVideoInfo()">عرض بيانات الفيديو</button>
 
-<div id="output"></div>
+<div class="container">
+    <h1><span style="color: #282828;">محلل</span> YouTube</h1>
+    
+    <div class="search-box">
+        <input type="text" id="videoUrl" placeholder="ضع رابط الفيديو هنا...">
+        <button onclick="getVideoInfo()">تحليل</button>
+    </div>
+
+    <div id="output"></div>
+</div>
 
 <script>
 async function getVideoInfo() {
   const url = document.getElementById('videoUrl').value;
-  if (!url) return alert("أدخل رابط الفيديو");
+  const outputDiv = document.getElementById('output');
 
-  const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
-  const data = await res.json();
-  console.log(data);
+  if (!url) return alert("يرجى إدخال رابط الفيديو أولاً");
 
-  if (data.items && data.items.length > 0) {
-    const video = data.items[0];
-    document.getElementById('output').innerHTML = `
-      <h2>${video.snippet.title}</h2>
-      <p>${video.snippet.description}</p>
-      <img src="${video.snippet.thumbnails.high.url}" width="320">
-      <p>مدة الفيديو: ${video.contentDetails.duration}</p>
-      <p>المشاهدات: ${video.statistics.viewCount}</p>
-    `;
-  } else {
-    document.getElementById('output').innerHTML = `<p>لم يتم العثور على بيانات الفيديو</p>`;
+  outputDiv.style.display = 'block';
+  outputDiv.innerHTML = "<p>جاري تحميل البيانات...</p>";
+
+  try {
+    const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+
+    if (data.items && data.items.length > 0) {
+      const video = data.items[0];
+      outputDiv.innerHTML = `
+        <div class="video-card">
+          <img src="${video.snippet.thumbnails.high.url}" alt="Thumbnail">
+          <h2 class="video-title">${video.snippet.title}</h2>
+          <div class="stats">
+            <div class="stat-item">👁️ مشاهدات: ${Number(video.statistics.viewCount).toLocaleString()}</div>
+            <div class="stat-item">⏳ المدة: ${video.contentDetails.duration.replace('PT','').replace('H','س ').replace('M','د ').replace('S','ث')}</div>
+          </div>
+          <p class="video-desc">${video.snippet.description}</p>
+        </div>
+      `;
+    } else {
+      outputDiv.innerHTML = `<p class="error-msg">❌ لم يتم العثور على بيانات، تأكد من صحة الرابط.</p>`;
+    }
+  } catch (error) {
+    outputDiv.innerHTML = `<p class="error-msg">⚠️ حدث خطأ في الاتصال بالخادم.</p>`;
   }
 }
 </script>
+
 </body>
 </html>
