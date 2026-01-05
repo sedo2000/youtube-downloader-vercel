@@ -3,275 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Pro - محمل الفيديوهات الذكي</title>
+    <title>محلل يوتيوب الذكي</title>
     <style>
         :root {
             --primary: #ff0000;
-            --dark-bg: #1a1a1a;
-            --card-bg: #ffffff;
-            --text-main: #333;
-            --accent: #007bff;
+            --dark: #212121;
+            --gray: #606060;
+            --light: #f9f9f9;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
+            padding: 20px;
         }
 
-        .container {
+        .app-card {
+            background: white;
             width: 100%;
-            max-width: 600px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            padding: 30px;
+            max-width: 550px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             overflow: hidden;
+            padding: 25px;
         }
 
-        .logo {
-            text-align: center;
+        .header h1 {
             color: var(--primary);
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 25px;
+            text-align: center;
+            margin-top: 0;
         }
 
         .input-group {
             display: flex;
-            background: #f1f3f4;
-            padding: 5px;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            transition: 0.3s;
-        }
-
-        .input-group:focus-within {
-            border-color: var(--primary);
-            background: #fff;
+            gap: 8px;
+            margin-bottom: 25px;
         }
 
         input {
             flex: 1;
-            border: none;
-            background: transparent;
-            padding: 12px 15px;
-            font-size: 16px;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
             outline: none;
         }
 
-        button#analyzeBtn {
+        input:focus { border-color: var(--primary); }
+
+        button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 25px;
+            padding: 0 20px;
             border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.3s;
         }
 
-        button#analyzeBtn:hover { opacity: 0.9; }
+        /* ستايل النتائج */
+        #output { display: none; animation: fadeIn 0.5s; }
 
-        #output {
-            margin-top: 30px;
-            display: none;
-            animation: slideUp 0.5s ease;
+        .thumb-container { position: relative; border-radius: 12px; overflow: hidden; }
+        .thumb-container img { width: 100%; display: block; }
+        
+        .download-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
         }
 
-        .video-preview {
-            position: relative;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .video-preview img { width: 100%; display: block; }
-
-        .video-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 15px 0;
-            color: var(--text-main);
-            line-height: 1.4;
-        }
+        .video-info h2 { font-size: 1.2rem; margin: 15px 0; color: var(--dark); }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .stat-item {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .stat-item span { display: block; font-weight: bold; color: var(--primary); }
-
-        /* قسم التحميل الجديد */
-        .download-box {
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .download-title {
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .options-grid {
-            display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 15px;
+            margin: 15px 0;
         }
 
-        .dl-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .stat-card {
+            background: var(--light);
             padding: 12px;
             border-radius: 10px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.3s;
-            border: 1px solid #ddd;
+            text-align: center;
         }
 
-        .dl-mp4 { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
-        .dl-mp3 { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+        .stat-label { font-size: 12px; color: var(--gray); display: block; }
+        .stat-value { font-weight: bold; color: var(--dark); font-size: 16px; }
 
-        .dl-link:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        .quality-tag {
-            font-size: 10px;
-            background: rgba(0,0,0,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-top: 4px;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .loader { display: none; text-align: center; padding: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="logo"><span>YouTube</span> Pro</div>
+<div class="app-card">
+    <div class="header">
+        <h1>YouTube Pro</h1>
+    </div>
 
     <div class="input-group">
-        <input type="text" id="videoUrl" placeholder="ضع رابط الفيديو هنا (YouTube)...">
-        <button id="analyzeBtn" onclick="processVideo()">تحليل</button>
+        <input type="text" id="videoUrl" placeholder="أدخل رابط الفيديو هنا...">
+        <button onclick="getVideoInfo()">تحليل</button>
     </div>
-
-    <div id="loader" class="loader">جاري جلب البيانات من السيرفر...</div>
 
     <div id="output">
-        <div id="videoContent"></div>
-    </div>
+        </div>
 </div>
 
 <script>
-    function extractVideoID(url) {
-        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[7].length == 11) ? match[7] : false;
-    }
+// وظيفة لتحويل مدة يوتيوب ISO 8601 إلى تنسيق وقت مقروء
+function parseDuration(duration) {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    const hours = (parseInt(match[1]) || 0);
+    const minutes = (parseInt(match[2]) || 0);
+    const seconds = (parseInt(match[3]) || 0);
+    
+    return [hours, minutes, seconds]
+        .map(v => v < 10 ? "0" + v : v)
+        .filter((v, i) => v !== "00" || i > 0)
+        .join(":");
+}
 
-    async function processVideo() {
-        const url = document.getElementById('videoUrl').value;
-        const videoId = extractVideoID(url);
-        const output = document.getElementById('output');
-        const loader = document.getElementById('loader');
+async function getVideoInfo() {
+    const url = document.getElementById('videoUrl').value;
+    const output = document.getElementById('output');
+    if (!url) return;
 
-        if (!videoId) {
-            alert("الرجاء إدخال رابط يوتيوب صحيح");
-            return;
-        }
+    output.style.display = 'block';
+    output.innerHTML = "<p style='text-align:center'>جاري التحليل...</p>";
 
-        loader.style.display = "block";
-        output.style.display = "none";
+    try {
+        const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
 
-        try {
-            // محاكاة جلب البيانات (لأن اليوتيوب يتطلب API Key خاص)
-            // في حالة كان لديك سيرفر، استبدل هذا الجزء بـ fetch الخاص بك
-            setTimeout(() => {
-                showData(videoId);
-                loader.style.display = "none";
-                output.style.display = "block";
-            }, 1000);
-
-        } catch (error) {
-            alert("حدث خطأ أثناء الاتصال");
-            loader.style.display = "none";
-        }
-    }
-
-    function showData(id) {
-        const videoContent = document.getElementById('videoContent');
-        
-        // بناء واجهة العرض والتحميل بجميع الصيغ
-        videoContent.innerHTML = `
-            <div class="video-preview">
-                <img src="https://img.youtube.com/vi/${id}/maxresdefault.jpg" alt="Thumbnail">
-            </div>
-
-            <h2 class="video-title">تم استخراج الفيديو بنجاح - جاهز للتحميل</h2>
-
-            <div class="stats-grid">
-                <div class="stat-item">الصيغة <span>MP4</span></div>
-                <div class="stat-item">الدقة <span>1080p</span></div>
-                <div class="stat-item">الحالة <span>متوفر</span></div>
-            </div>
-
-            <div class="download-box">
-                <div class="download-title">📥 اختر الجودة والصيغة:</div>
-                <div class="options-grid">
-                    <a href="https://savemp4.red/?url=https://www.youtube.com/watch?v=${id}" target="_blank" class="dl-link dl-mp4">
-                        فيديو MP4
-                        <span class="quality-tag">1080p HD</span>
-                    </a>
-                    <a href="https://savemp4.red/?url=https://www.youtube.com/watch?v=${id}" target="_blank" class="dl-link dl-mp4">
-                        فيديو MP4
-                        <span class="quality-tag">720p</span>
-                    </a>
-                    <a href="https://savemp4.red/?url=https://www.youtube.com/watch?v=${id}" target="_blank" class="dl-link dl-mp4">
-                        فيديو MP4
-                        <span class="quality-tag">480p</span>
-                    </a>
-                    
-                    <a href="https://ytmp3.cc/en/convert?url=https://www.youtube.com/watch?v=${id}" target="_blank" class="dl-link dl-mp3">
-                        صوت MP3
-                        <span class="quality-tag">320kbps</span>
-                    </a>
+        if (data.items && data.items[0]) {
+            const v = data.items[0];
+            const thumbUrl = v.snippet.thumbnails.maxres ? v.snippet.thumbnails.maxres.url : v.snippet.thumbnails.high.url;
+            
+            output.innerHTML = `
+                <div class="thumb-container">
+                    <img src="${thumbUrl}">
+                    <a href="${thumbUrl}" target="_blank" download class="download-btn">📥 تحميل الغلاف بجودة عالية</a>
                 </div>
-            </div>
+                
+                <div class="video-info">
+                    <h2>${v.snippet.title}</h2>
+                </div>
 
-            <p style="text-align:center; font-size:12px; color:#777; margin-top:15px;">
-                ملاحظة: سيتم معالجة الرابط عبر خوادم التحميل السريعة لضمان أفضل جودة.
-            </p>
-        `;
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">عدد المشاهدات</span>
+                        <span class="stat-value">${Number(v.statistics.viewCount).toLocaleString()}</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">مدة الفيديو</span>
+                        <span class="stat-value">${parseDuration(v.contentDetails.duration)}</span>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="margin-top:0">
+                    <span class="stat-label">عدد الإعجابات</span>
+                    <span class="stat-value">👍 ${Number(v.statistics.likeCount).toLocaleString()}</span>
+                </div>
+            `;
+        } else {
+            output.innerHTML = "لم يتم العثور على الفيديو";
+        }
+    } catch (e) {
+        output.innerHTML = "خطأ في جلب البيانات";
     }
+}
 </script>
 
 </body>
